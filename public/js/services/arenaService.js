@@ -1,5 +1,6 @@
 //Сервис для работы арены
-angular.module('fotm').register.service('arenaService', ["gettextCatalog", "randomService", function(gettextCatalog, randomService) {
+(function (module) {
+    module.service('arenaService', function(gettextCatalog, randomService) {
     var map=[];
     return {
         //Заполнение карты DIV-ами
@@ -15,13 +16,13 @@ angular.module('fotm').register.service('arenaService', ["gettextCatalog", "rand
                         var ground;
                         switch (groundType) {
                             case(0):
-                                ground = "url(./images/tiles/grass.jpg)";
+                                ground = "url(./images/assets/img/tiles/grass.jpg)";
                                 break;
                             case(1):
-                                ground = "url(./images/tiles/sand.jpg)";
+                                ground = "url(./images/assets/img/tiles/sand.jpg)";
                                 break;
                             case(2):
-                                ground = "url(./images/tiles/snow.jpg)";
+                                ground = "url(./images/assets/img/tiles/snow.jpg)";
                                 break;
                         }
                         return ground;
@@ -33,13 +34,13 @@ angular.module('fotm').register.service('arenaService', ["gettextCatalog", "rand
                         var ground;
                         switch (groundType) {
                             case(0):
-                                ground = "url(./images/tiles/grass_wall.jpg)";
+                                ground = "url(./images/assets/img/tiles/grass_wall.jpg)";
                                 break;
                             case(1):
-                                ground = "url(./images/tiles/sand_wall.jpg)";
+                                ground = "url(./images/assets/img/tiles/sand_wall.jpg)";
                                 break;
                             case(2):
-                                ground = "url(./images/tiles/snow_wall.jpg)";
+                                ground = "url(./images/assets/img/tiles/snow_wall.jpg)";
                                 break;
                         }
                         return ground;
@@ -84,9 +85,11 @@ angular.module('fotm').register.service('arenaService', ["gettextCatalog", "rand
         },
         //расчёт игровой очереди
         calcQueue: function(myTeam, enemyTeam, currentChar) {
+
             var activeQueue = []; //Активная очередь
             var endedQueue = []; //отходившая очередь
             var queue = [];
+            var removedActive = {};
 
             for(var i=0;i<myTeam.length;i++){
                 if(!myTeam[i].isDead) queue[queue.length]=myTeam[i];
@@ -96,7 +99,12 @@ angular.module('fotm').register.service('arenaService', ["gettextCatalog", "rand
             }
 
             if(currentChar) {
-                queue.splice(queue.indexOf(currentChar),1);
+                for(i = 0;i<queue.length;i++){
+                    if(queue[i]._id==currentChar._id) {
+                        removedActive = queue[i];
+                        queue.splice(i,1);
+                    }
+                }
             } //Не включаем персонажа, который в данный момент совершает ход
 
             for(i=0;i<queue.length;i++){
@@ -159,8 +167,7 @@ angular.module('fotm').register.service('arenaService', ["gettextCatalog", "rand
 
             //Вставляем текущего персонажа вперёд массива
             if(currentChar) {
-                var currentArray = [currentChar];
-                ready = currentArray.concat(ready);
+                ready.unshift(removedActive);
             }
 
             return ready;
@@ -264,6 +271,10 @@ angular.module('fotm').register.service('arenaService', ["gettextCatalog", "rand
             }
             if(message.indexOf("Now is turn of")!=-1) {
                 message=message.replace("Now is turn of", gettextCatalog.getString("Now is turn of"));
+            }
+            if(message.indexOf("The battle ends after")!=-1) {
+                message=message.replace("The battle ends after", gettextCatalog.getString("The battle ends after"));
+                message=message.replace("turns", gettextCatalog.getString("turns"));
             }
             if(message.indexOf("Someone invisible stands on that cell!")!=-1) {
                 message=message.replace("Someone invisible stands on that cell!", gettextCatalog.getString("Someone invisible stands on that cell!"));
@@ -565,4 +576,5 @@ angular.module('fotm').register.service('arenaService', ["gettextCatalog", "rand
             return message;
         }
     }
-}]);
+});
+})(angular.module("fotm"));

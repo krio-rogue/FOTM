@@ -1,7 +1,8 @@
-angular.module('fotm').register.controller("ArenaController", ["$scope", '$rootScope', '$location', '$timeout', '$interval', 'character', 'arenaService', 'hotkeys', 'mainSocket', 'gettextCatalog', 'soundService', ArenaController]);
+(function (module) {
+    module.controller("ArenaController", ArenaController);
 
-//Контроллер выбора пати
-function ArenaController($scope, $rootScope, $location, $timeout, $interval, character, arenaService, hotkeys, mainSocket, gettextCatalog, soundService) {
+    //Контроллер выбора пати
+    function ArenaController($scope, $rootScope, $location, $timeout, $interval, character, arenaService, hotkeys, mainSocket, gettextCatalog, soundService, chatService) {
     $scope.map = arenaService.fillMap($rootScope.currentBattle.groundType, $rootScope.currentBattle.wallPositions); //Карта - двумерный массив на стороне клиента
     $scope.CombatLog = []; //Массив сообщений с информацией
     $scope.myTurn = false; //переменная, показывающая, мой ли сейчас игрок ходит
@@ -586,7 +587,95 @@ function ArenaController($scope, $rootScope, $location, $timeout, $interval, cha
         }
 
         if(myDeaths==3){
+            makeLose();
+        }
+        else if(enemyDeaths==3){
+            makeWin();
+        }
+        //Вышло время
+        else if($scope.turnsSpended>=100){
+            if(myDeaths>enemyDeaths){
+                makeLose();
+            }
+            else if(myDeaths<enemyDeaths){
+                makeWin();
+            }
+            else {
+                //Играем музыку
+                soundService.getMusicObj().winMusic.play();
 
+                stopTurnTimer();
+
+                gainedSouls.red+=1;
+                gainedSouls.green+=1;
+                gainedSouls.blue+=1;
+
+                $scope.myTeam.souls.red+=gainedSouls.red;
+                $scope.myTeam.souls.green+=gainedSouls.green;
+                $scope.myTeam.souls.blue+=gainedSouls.blue;
+
+                $scope.battleEnd={
+                    ended: true,
+                    title: gettextCatalog.getString("Draw"),
+                    rating: $scope.myTeam.rating,
+                    ratingChange: ratingChange,
+                    souls: gainedSouls
+                };
+
+                mainSocket.emit('setTeam',
+                    {
+                        _id: $scope.myTeam._id,
+                        souls: $scope.myTeam.souls
+                    });
+            }
+        }
+
+        function makeWin(){
+            //Играем музыку
+            soundService.getMusicObj().winMusic.play();
+
+            stopTurnTimer();
+
+            if($scope.myTeam.rating>$scope.enemyTeam.rating){
+                ratingChange = $scope.myTeam.rating-$scope.enemyTeam.rating;
+                if(ratingChange>25) ratingChange=25;
+            }
+            else if ($scope.myTeam.rating<$scope.enemyTeam.rating){
+                ratingChange = ($scope.enemyTeam.rating-$scope.myTeam.rating)*2;
+                if(ratingChange>25) ratingChange=25;
+            }
+            else {
+                ratingChange = 10;
+            }
+
+            $scope.myTeam.rating+=ratingChange;
+
+            gainedSouls.red+=4;
+            gainedSouls.green+=4;
+            gainedSouls.blue+=4;
+
+            $scope.myTeam.souls.red+=gainedSouls.red;
+            $scope.myTeam.souls.green+=gainedSouls.green;
+            $scope.myTeam.souls.blue+=gainedSouls.blue;
+
+            $scope.battleEnd={
+                ended: true,
+                title: gettextCatalog.getString("You win"),
+                rating: $scope.myTeam.rating,
+                ratingChange: "+"+ratingChange,
+                souls: gainedSouls
+            };
+
+            mainSocket.emit('setTeam',
+                {
+                    _id: $scope.myTeam._id,
+                    rating: $scope.myTeam.rating,
+                    wins: $scope.myTeam.wins+1,
+                    souls: $scope.myTeam.souls
+                });
+        }
+
+        function makeLose() {
             //Играем музыку
             soundService.getMusicObj().loseMusic.play();
 
@@ -631,12 +720,12 @@ function ArenaController($scope, $rootScope, $location, $timeout, $interval, cha
             };
 
             mainSocket.emit('setTeam',
-            {
-                _id: $scope.myTeam._id,
-                rating: $scope.myTeam.rating,
-                loses: $scope.myTeam.loses+1,
-                souls: $scope.myTeam.souls
-            });
+                {
+                    _id: $scope.myTeam._id,
+                    rating: $scope.myTeam.rating,
+                    loses: $scope.myTeam.loses+1,
+                    souls: $scope.myTeam.souls
+                });
 
             //Устанавливаем флаг проигрыша для персонажей
             for(i=0;i<$scope.myTeam.characters.length;i++){
@@ -646,90 +735,22 @@ function ArenaController($scope, $rootScope, $location, $timeout, $interval, cha
                 });
             }
         }
-
-        else if(enemyDeaths==3){
-
-            //Играем музыку
-            soundService.getMusicObj().winMusic.play();
-
-            stopTurnTimer();
-
-            if($scope.myTeam.rating>$scope.enemyTeam.rating){
-                ratingChange = $scope.myTeam.rating-$scope.enemyTeam.rating;
-                if(ratingChange>25) ratingChange=25;
-            }
-            else if ($scope.myTeam.rating<$scope.enemyTeam.rating){
-                ratingChange = ($scope.enemyTeam.rating-$scope.myTeam.rating)*2;
-                if(ratingChange>25) ratingChange=25;
-            }
-            else {
-                ratingChange = 10;
-            }
-
-            $scope.myTeam.rating+=ratingChange;
-
-            gainedSouls.red+=4;
-            gainedSouls.green+=4;
-            gainedSouls.blue+=4;
-
-            $scope.myTeam.souls.red+=gainedSouls.red;
-            $scope.myTeam.souls.green+=gainedSouls.green;
-            $scope.myTeam.souls.blue+=gainedSouls.blue;
-
-            $scope.battleEnd={
-                ended: true,
-                title: gettextCatalog.getString("You win"),
-                rating: $scope.myTeam.rating,
-                ratingChange: "+"+ratingChange,
-                souls: gainedSouls
-            };
-
-            mainSocket.emit('setTeam',
-            {
-                _id: $scope.myTeam._id,
-                rating: $scope.myTeam.rating,
-                wins: $scope.myTeam.wins+1,
-                souls: $scope.myTeam.souls
-            });
-        }
-        //ничья
-        else if($scope.turnsSpended>=100){
-            //Играем музыку
-            soundService.getMusicObj().winMusic.play();
-
-            stopTurnTimer();
-
-            gainedSouls.red+=1;
-            gainedSouls.green+=1;
-            gainedSouls.blue+=1;
-
-            $scope.myTeam.souls.red+=gainedSouls.red;
-            $scope.myTeam.souls.green+=gainedSouls.green;
-            $scope.myTeam.souls.blue+=gainedSouls.blue;
-
-            $scope.battleEnd={
-                ended: true,
-                title: gettextCatalog.getString("Draw"),
-                rating: $scope.myTeam.rating,
-                ratingChange: ratingChange,
-                souls: gainedSouls
-            };
-
-            mainSocket.emit('setTeam',
-                {
-                    _id: $scope.myTeam._id,
-                    souls: $scope.myTeam.souls
-                });
-        }
     }
 
     //После загрузки контроллера проверяем, загрузился ли контроллер у противника
     $scope.$on('$routeChangeSuccess', function () {
         //Музыка
-        soundService.getMusicObj().cityAmbience.pause();
-        soundService.chooseAmbient($rootScope.currentBattle.groundType);
+        if(soundService.getMusicObj().cityMusic){
+            soundService.getMusicObj().cityMusic.pause();
+        }
+        if(!soundService.getMusicObj().battleMusic || soundService.getMusicObj().battleMusic.paused){
+            soundService.chooseAmbient($rootScope.currentBattle.groundType);
+            soundService.initMusic('battle');
+        }
+
         soundService.loadSounds(); //Загружаем все необходимые для боя звуки
 
+        chatService.clearMessages('arena');
         $scope.opponentWaiting=true;
 
         var timerCount = 0;
@@ -742,6 +763,17 @@ function ArenaController($scope, $rootScope, $location, $timeout, $interval, cha
                 $rootScope.showInfoMessage(gettextCatalog.getString("Your enemy not ready to battle"));
             }
         },1000);
+    });
+
+    $scope.$watch(function(){
+        if(soundService.getMusicObj().battleMusic) {
+            return soundService.getMusicObj().battleMusic.progress
+        }
+    }, function(newVal){
+        if(newVal>=1){
+            soundService.getMusicObj().battleMusic.pause();
+            soundService.nextTrack('battle');
+        }
     });
 
     //Если противник готов, начинаем первый ход
@@ -841,7 +873,7 @@ function ArenaController($scope, $rootScope, $location, $timeout, $interval, cha
         }
 
         $scope.enemyTeam.characters = arenaService.convertEnemyTeam(chars);
-        $scope.queue = arenaService.calcQueue($scope.myTeam.characters, $scope.enemyTeam.characters); //вычисляем очередь хода
+        $scope.queue = arenaService.calcQueue($scope.myTeam.characters, $scope.enemyTeam.characters, $scope.activeChar); //вычисляем очередь хода
         $scope.myTurn = arenaService.checkTurn($scope.myTeam.characters, $scope.queue[0]); //проверка, мой ли сейчас ход
         $scope.activeChar = $scope.queue[0]; //назначаем активного персонажа
 
@@ -870,7 +902,7 @@ function ArenaController($scope, $rootScope, $location, $timeout, $interval, cha
             }
         }
         cleanSoundBuffers(); //Звуки были отправлены, так что можно очищать буфер
-        $scope.queue = arenaService.calcQueue($scope.myTeam.characters, $scope.enemyTeam.characters); //вычисляем очередь хода
+        $scope.queue = arenaService.calcQueue($scope.myTeam.characters, $scope.enemyTeam.characters, $scope.activeChar); //вычисляем очередь хода
         $scope.activeChar = $scope.queue[0]; //назначаем активного персонажа
         showLogs(); //выводим сообщения персонажей
         playSounds(); //Проигрываем звуки
@@ -922,7 +954,7 @@ function ArenaController($scope, $rootScope, $location, $timeout, $interval, cha
         log("Now is turn of "+$scope.activeChar.charName+".", $scope.activeChar.battleColor);
         //объявление об исходе боя в ничью
         if($scope.turnsSpended>=90){
-            log("The battle ends in a draw after "+(100-$scope.turnsSpended)+" turns.");
+            log("The battle ends after "+(100-$scope.turnsSpended)+" turns.");
         }
     });
 
@@ -973,218 +1005,227 @@ function ArenaController($scope, $rootScope, $location, $timeout, $interval, cha
         })
 }
 
-//Директива авто-прокрутки комбат-лога
-angular.module('fotm').register.directive('autoscroll', function () {
-    return {
-        link: function postLink(scope, element, attrs) {
-            scope.$watch(
-                function () {
-                    return element.children().length;
-                },
-                function () {
+    //Директива авто-прокрутки комбат-лога
+    module.directive('autoscroll', function () {
+        return {
+            link: function postLink(scope, element, attrs) {
+                scope.$watch(
+                    function () {
+                        return element.children().length;
+                    },scroll
+                );
+
+                scope.$watch(
+                    function () {
+                        return element.is(":visible")
+                    },scroll
+                );
+
+                function scroll() {
                     element.animate({ scrollTop: element.prop('scrollHeight')}, 0);
                 }
-            );
-        }
-    };
-});
+            }
+        };
+    });
 
-//Директива, отвечающая за рисование стрелок
-angular.module('fotm').register.directive("arrows", function(){
-    return {
-        restrict: "A",
-        link: function(scope, element, attrs){
-            var ctx = element[0].getContext('2d');
-            var start;
-            var end;
-            var color;
+    //Директива, отвечающая за рисование стрелок
+    module.directive("arrows", function(){
+        return {
+            restrict: "A",
+            link: function(scope, element, attrs){
+                var ctx = element[0].getContext('2d');
+                var start;
+                var end;
+                var color;
 
-            //следим за изменением цвета
-            scope.$watch(attrs.arrowColor, function(newValue) {
-                if(newValue) {
-                    color = newValue;
-                }
-            });
-
-            //следим за изменением начальной точки
-            scope.$watch(attrs.start, function(newValue) {
-                ctx.clearRect(0, 0, element[0].width, element[0].height);
-                if(newValue) {
-                    start = {x: newValue.x * 32+16, y: newValue.y * 32+16};
-                }
-            });
-
-            //следим за изменением конечной точки
-            scope.$watch(attrs.endTile, function(newValue) {
-                ctx.clearRect(0, 0, element[0].width, element[0].height);
-                if(newValue) {
-                    end = {x: newValue.x*32+16, y: newValue.y*32+16};
-                    if(start) {
-                        canvas_arrow(ctx, start.x, start.y, end.x, end.y, color);
+                //следим за изменением цвета
+                scope.$watch(attrs.arrowColor, function(newValue) {
+                    if(newValue) {
+                        color = newValue;
                     }
-                }
-            });
+                });
 
-            //следим за изменением конечной точки
-            scope.$watch(attrs.endChar, function(newValue) {
-                ctx.clearRect(0, 0, element[0].width, element[0].height);
-                if(newValue) {
-                    end = {x: newValue.x*32+16, y: newValue.y*32+16};
-                    if(start) {
-                        if(!(start.x===end.x && start.y===end.y)){
+                //следим за изменением начальной точки
+                scope.$watch(attrs.start, function(newValue) {
+                    ctx.clearRect(0, 0, element[0].width, element[0].height);
+                    if(newValue) {
+                        start = {x: newValue.x * 32+16, y: newValue.y * 32+16};
+                    }
+                });
+
+                //следим за изменением конечной точки
+                scope.$watch(attrs.endTile, function(newValue) {
+                    ctx.clearRect(0, 0, element[0].width, element[0].height);
+                    if(newValue) {
+                        end = {x: newValue.x*32+16, y: newValue.y*32+16};
+                        if(start) {
                             canvas_arrow(ctx, start.x, start.y, end.x, end.y, color);
                         }
                     }
-                }
-            });
+                });
 
-            function canvas_arrow(ctx, fromx, fromy, tox, toy, color){
-                var headlen = 10; //высота головы стрелки
-
-                var angle = Math.atan2(toy-fromy,tox-fromx);
-
-                //Рисуем базовую линию
-                ctx.beginPath();
-                ctx.moveTo(fromx, fromy);
-                ctx.lineTo(tox, toy);
-                ctx.strokeStyle = color;
-                ctx.lineWidth = 3;
-                ctx.stroke();
-
-                //Рисуем одно ухо стрелки
-                ctx.beginPath();
-                ctx.moveTo(tox, toy);
-                ctx.lineTo(tox-headlen*Math.cos(angle-Math.PI/7),toy-headlen*Math.sin(angle-Math.PI/7));
-
-                //переходим на противоположную сторону к концу другого уха стрелки
-                ctx.moveTo(tox-headlen*Math.cos(angle+Math.PI/7),toy-headlen*Math.sin(angle+Math.PI/7));
-
-                //проводим линию к вершине стрелки
-                ctx.lineTo(tox, toy);
-                ctx.lineTo(tox-headlen*Math.cos(angle-Math.PI/7),toy-headlen*Math.sin(angle-Math.PI/7));
-
-                ctx.strokeStyle = color;
-                ctx.lineWidth = 3;
-                ctx.stroke();
-            }
-        }
-    };
-});
-
-//Директива, отвечающая за рисование стрелок
-angular.module('fotm').register.directive("battleText", ['$interval', '$timeout', function($interval, $timeout){
-    return {
-        restrict: "C",
-        scope: {
-            buffer: '='
-        },
-        link: function(scope, element, attrs){
-            var childCount=1; //Счётчик вылетевших сообщений
-            var createdElementsCount=0; //Количество созданных элементов
-            //следим за изменением буфера
-            scope.$watchCollection('buffer', function(newValue, oldValue) {
-                var buf = [];
-                var createdElements = [];
-                if(newValue.length===0){
-                    childCount=1;
-                    var childs=element.find('.battle-text-cont');
-                    if(childs.length>createdElementsCount){
-                        childs.remove();
-                    }
-                }
-                if(newValue.length>oldValue.length && newValue.length>0) {
-                    buf = newValue.slice();
-                    //Если старый массив ещё не очищен
-                    if(oldValue.length>0){
-                        for(var i=0;i<oldValue.length;i++){
-                            for(var j=0;j<newValue.length;j++){
-                                if(oldValue[i].caster===newValue[j].caster &&
-                                    oldValue[i].text===newValue[j].text &&
-                                    oldValue[i].icon===newValue[j].icon){
-                                    buf.splice(j,1);
-                                }
+                //следим за изменением конечной точки
+                scope.$watch(attrs.endChar, function(newValue) {
+                    ctx.clearRect(0, 0, element[0].width, element[0].height);
+                    if(newValue) {
+                        end = {x: newValue.x*32+16, y: newValue.y*32+16};
+                        if(start) {
+                            if(!(start.x===end.x && start.y===end.y)){
+                                canvas_arrow(ctx, start.x, start.y, end.x, end.y, color);
                             }
                         }
                     }
+                });
 
-                    createBattleText();
+                function canvas_arrow(ctx, fromx, fromy, tox, toy, color){
+                    var headlen = 10; //высота головы стрелки
 
-                    if(buf.length>0){
-                        var textInterval = $interval(createBattleText,1000);
+                    var angle = Math.atan2(toy-fromy,tox-fromx);
+
+                    //Рисуем базовую линию
+                    ctx.beginPath();
+                    ctx.moveTo(fromx, fromy);
+                    ctx.lineTo(tox, toy);
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+
+                    //Рисуем одно ухо стрелки
+                    ctx.beginPath();
+                    ctx.moveTo(tox, toy);
+                    ctx.lineTo(tox-headlen*Math.cos(angle-Math.PI/7),toy-headlen*Math.sin(angle-Math.PI/7));
+
+                    //переходим на противоположную сторону к концу другого уха стрелки
+                    ctx.moveTo(tox-headlen*Math.cos(angle+Math.PI/7),toy-headlen*Math.sin(angle+Math.PI/7));
+
+                    //проводим линию к вершине стрелки
+                    ctx.lineTo(tox, toy);
+                    ctx.lineTo(tox-headlen*Math.cos(angle-Math.PI/7),toy-headlen*Math.sin(angle-Math.PI/7));
+
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                }
+            }
+        };
+    });
+
+    //Директива, отвечающая за рисование стрелок
+    module.directive("battleText", function($interval, $timeout){
+        return {
+            restrict: "C",
+            scope: {
+                buffer: '='
+            },
+            link: function(scope, element, attrs){
+                var childCount=1; //Счётчик вылетевших сообщений
+                var createdElementsCount=0; //Количество созданных элементов
+                //следим за изменением буфера
+                scope.$watchCollection('buffer', function(newValue, oldValue) {
+                    var buf = [];
+                    var createdElements = [];
+                    if(newValue.length===0){
+                        childCount=1;
+                        var childs=element.find('.battle-text-cont');
+                        if(childs.length>createdElementsCount){
+                            childs.remove();
+                        }
                     }
-                    else {
-                        $timeout(function(){
-                            for(var i=0;i<createdElements.length;i++){
-                                createdElements[i].remove();
-                                if(createdElementsCount>0) createdElementsCount--;
+                    if(newValue.length>oldValue.length && newValue.length>0) {
+                        buf = newValue.slice();
+                        //Если старый массив ещё не очищен
+                        if(oldValue.length>0){
+                            for(var i=0;i<oldValue.length;i++){
+                                for(var j=0;j<newValue.length;j++){
+                                    if(oldValue[i].caster===newValue[j].caster &&
+                                        oldValue[i].text===newValue[j].text &&
+                                        oldValue[i].icon===newValue[j].icon){
+                                        buf.splice(j,1);
+                                    }
+                                }
                             }
-                            scope.buffer=[];
-                        },3000);
-                    }
+                        }
 
-                    function createBattleText(){
+                        createBattleText();
+
                         if(buf.length>0){
-                            var isCritical = "";
-                            if(buf[buf.length-1].crit) isCritical="crit";
-
-                            element.append("<div class='battle-text-cont child_"+childCount+" "+isCritical+"'><div class='battle-text-icon' style='background-image: "+buf[buf.length-1].icon+"; background-color: "+buf[buf.length-1].color+"'></div><span style='color: "+getTextTypeColor(buf[buf.length-1].type)+"'>"+buf[buf.length-1].text+"</span></div>");
-                            $timeout(function(){
-                                var childName='.battle-text-cont.child_'+childCount;
-                                createdElements.push(element.find(childName));
-                                createdElementsCount++;
-                                element.find(childName).css('opacity', 0);
-                                var round=4*Math.floor(childCount/4);
-                                if((childCount-round)%4===0) {
-                                    element.find(childName).css('top', -32);
-                                    element.find(childName).css('left', -32);
-                                }
-                                else if ((childCount-round)%3===0){
-                                    element.find(childName).css('top', 32);
-                                    element.find(childName).css('left', -32);
-                                }
-                                else if((childCount-round)%2===0) {
-                                    element.find(childName).css('top', 32);
-                                    element.find(childName).css('left', 32);
-                                }
-                                else {
-                                    element.find(childName).css('top', -32);
-                                    element.find(childName).css('left', 32);
-                                }
-
-                                childCount++;
-                            },100);
-
-                            buf.pop();
+                            var textInterval = $interval(createBattleText,1000);
                         }
                         else {
                             $timeout(function(){
-                                scope.buffer=[];
                                 for(var i=0;i<createdElements.length;i++){
                                     createdElements[i].remove();
                                     if(createdElementsCount>0) createdElementsCount--;
                                 }
-                                textShow=false;
-                                $interval.cancel(textInterval);
+                                scope.buffer=[];
                             },3000);
                         }
+
+                        function createBattleText(){
+                            if(buf.length>0){
+                                var isCritical = "";
+                                if(buf[buf.length-1].crit) isCritical="crit";
+
+                                element.append("<div class='battle-text-cont child_"+childCount+" "+isCritical+"'><div class='battle-text-icon icon' style='background-image: "+buf[buf.length-1].icon+"; background-color: "+buf[buf.length-1].color+"'></div><span style='color: "+getTextTypeColor(buf[buf.length-1].type)+"'>"+buf[buf.length-1].text+"</span></div>");
+                                $timeout(function(){
+                                    var childName='.battle-text-cont.child_'+childCount;
+                                    createdElements.push(element.find(childName));
+                                    createdElementsCount++;
+                                    element.find(childName).css('opacity', 0);
+                                    var round=4*Math.floor(childCount/4);
+                                    if((childCount-round)%4===0) {
+                                        element.find(childName).css('top', -32);
+                                        element.find(childName).css('left', -32);
+                                    }
+                                    else if ((childCount-round)%3===0){
+                                        element.find(childName).css('top', 32);
+                                        element.find(childName).css('left', -32);
+                                    }
+                                    else if((childCount-round)%2===0) {
+                                        element.find(childName).css('top', 32);
+                                        element.find(childName).css('left', 32);
+                                    }
+                                    else {
+                                        element.find(childName).css('top', -32);
+                                        element.find(childName).css('left', 32);
+                                    }
+
+                                    childCount++;
+                                },100);
+
+                                buf.pop();
+                            }
+                            else {
+                                $timeout(function(){
+                                    scope.buffer=[];
+                                    for(var i=0;i<createdElements.length;i++){
+                                        createdElements[i].remove();
+                                        if(createdElementsCount>0) createdElementsCount--;
+                                    }
+                                    textShow=false;
+                                    $interval.cancel(textInterval);
+                                },3000);
+                            }
+                        }
+                    }
+                });
+
+                function getTextTypeColor(type) {
+                    switch (type) {
+                        case "heal":
+                            return "#0055AF";
+                            break;
+                        case "damage":
+                            return "#ff0906";
+                            break;
+                        case "other":
+                            return "#000";
+                            break;
                     }
                 }
-            });
 
-            function getTextTypeColor(type) {
-                switch (type) {
-                    case "heal":
-                        return "#0055AF";
-                        break;
-                    case "damage":
-                        return "#ff0906";
-                        break;
-                    case "other":
-                        return "#000";
-                        break;
-                }
             }
+        };
+    });
 
-        }
-    };
-}]);
+})(angular.module("fotm"));

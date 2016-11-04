@@ -52,6 +52,22 @@ var schema = new Schema({
     }
 });
 
+//GET------------------------------------------------------------------------
+
+//Выборка чара по любому условию
+schema.statics.getByAny = function(cond, callback){
+    var Character = this;
+    Character.findOne(cond, callback);
+};
+
+//Выборка чаров по любому условию
+schema.statics.getAllByAny = function(cond, callback){
+    var Character = this;
+    Character.find(cond, callback);
+};
+
+//CREATE---------------------------------------------------------------------
+
 //Создаём нового персонажа (пока пустого)
 schema.statics.create = function(teamId, callback){
     var Character = this;
@@ -79,6 +95,22 @@ schema.statics.create = function(teamId, callback){
     ], callback);
 };
 
+//UPDATE---------------------------------------------------------------------
+
+schema.statics.setById = function(charId, setter, callback) {
+    var Character = this;
+    Character.findByIdAndUpdate(charId,
+        {$set: setter}, {upsert: true},
+        callback);
+};
+
+//DELETE---------------------------------------------------------------------
+
+schema.statics.deleteById = function(charId, callback) {
+    var Character = this;
+    Character.findByIdAndRemove(charId, callback);
+};
+
 exports.Character = mongoose.model('Character', schema);
 
 function CustomError(message) {
@@ -93,3 +125,22 @@ util.inherits(CustomError, Error);
 CustomError.prototype.name = 'CustomError';
 
 exports.CustomError = CustomError;
+
+//Вариант обновления всей базы
+//Character.find({}, function(err, chars){
+//    if (err) socket.emit("customError", err);
+//    log.info("Total chars: "+chars.length);
+//    chars.forEach(function(char, i) {
+//        if(char.portrait)
+//        {
+//            if(char.portrait.length>0){
+//                char.portrait = char.portrait.replace("images/portraits/", "images/assets/img/portraits/");
+//                char.save(function(err, char){
+//                    log.info("RENAME ready for "+i+": "+char.charName);
+//                    if (err) socket.emit("customError", err);
+//                });
+//            }
+//        }
+//    });
+//    log.info("READY");
+//});

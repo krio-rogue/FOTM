@@ -1,5 +1,6 @@
 //Фабрика, которая по сути является "классом" character
-angular.module('fotm').register.factory('character', ["abilityService", "effectService", "randomService", "characterService", "gettextCatalog", "soundService", "arenaService", function(abilityService, effectService, randomService, characterService, gettextCatalog, soundService, arenaService) {
+(function (module) {
+    module.factory('character', function(abilityService, effectService, randomService, characterService, gettextCatalog, soundService, arenaService) {
 
     //Конструктор
     var Character = function(char) {
@@ -107,15 +108,15 @@ angular.module('fotm').register.factory('character', ["abilityService", "effectS
                             if(socketArray[i].gem.name!=="Void"){
                                 switch(socketArray[i].gem.color){
                                     case "red":
-                                        socketArray[i].gem.image = function() { return 'url(../images/icons/inventory/rupee.svg)'};
+                                        socketArray[i].gem.image = function() { return 'url(../images/assets/svg/view/sprites.svg#inventory--rupee)'};
                                         socketArray[i].gem.bgColor = function() {return "#cc0000"};
                                         break;
                                     case "green":
-                                        socketArray[i].gem.image = function() { return 'url(../images/icons/inventory/emerald.svg)'};
+                                        socketArray[i].gem.image = function() { return 'url(../images/assets/svg/view/sprites.svg#inventory--emerald)'};
                                         socketArray[i].gem.bgColor = function() {return "#77b300"};
                                         break;
                                     case "blue":
-                                        socketArray[i].gem.image = function() { return 'url(../images/icons/inventory/saphir.svg)'};
+                                        socketArray[i].gem.image = function() { return 'url(../images/assets/svg/view/sprites.svg#inventory--saphir)'};
                                         socketArray[i].gem.bgColor = function() {return "#2a9fd6"};
                                         break;
                                 }
@@ -1009,7 +1010,7 @@ angular.module('fotm').register.factory('character', ["abilityService", "effectS
                 //value-=fffValue; дамаг не уменьшается, а только возвращается атакующему
                 fffValue = fffValue*(1+self.spellPower);
                 if(!caster.isDead && caster.findEffect("Fight Fire With Fire")===-1) { //Во избежание бесконечной рекурсии нельзя переводить дамаг на того, у кого тоже есть Fight Fire With Fire
-                    caster.takeDamage(fffValue, self, {name: "Fight Fire With Fire", icon: "url(../images/icons/abilities/FightFireWithFire.svg)", role: "malefic"}, true, true, isCritical, enemyTeam, myTeam);
+                    caster.takeDamage(fffValue, self, {name: "Fight Fire With Fire", icon: "url(../images/assets/svg/view/sprites.svg#abilities--FightFireWithFire)", role: "malefic"}, true, true, isCritical, enemyTeam, myTeam);
                 }
             }
         }
@@ -1043,7 +1044,7 @@ angular.module('fotm').register.factory('character', ["abilityService", "effectS
             self.buffs=[];
             self.debuffs=[];
             self.isDead=true;
-            self.portrait = "./images/portraits/death.jpg";
+            self.portrait = "./images/assets/img/portraits/death.jpg";
             self.logBuffer.push(self.charName + " is dead");
             self.playSound("death");
         }
@@ -1698,12 +1699,11 @@ angular.module('fotm').register.factory('character', ["abilityService", "effectS
         return count;
     };
 
-
     Character.prototype.getSize = function() {
         var self = this;
         console.log("Character "+self.charName+" length: "+byteLength(JSON.stringify(self))+" bytes");
     };
 
-
     return Character;
-}]);
+});
+})(angular.module("fotm"));

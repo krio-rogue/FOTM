@@ -1,5 +1,6 @@
 //Сервис эффектов в игре
-angular.module('fotm').register.service('effectService', ["randomService", "gettextCatalog", function(randomService, gettextCatalog) {
+(function (module) {
+    module.service('effectService', function(randomService, gettextCatalog) {
     return {
         effect: function(name, variant){
             switch(name){
@@ -17,7 +18,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                                 one: (this.variant*7).toFixed(0)
                             });
                     },
-                    icon : function(){ return "url(../images/icons/abilities/StrongArmOfTheLaw.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--StrongArmOfTheLaw)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         owner.hitChanceMod-=this.variant*0.07;
                     },
@@ -46,7 +47,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                         }
 
                     },
-                    icon : function(){ return "url(../images/icons/abilities/DefenderOfTheFaith.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--DefenderOfTheFaith)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         switch(this.variant){
                             case 1:
@@ -107,7 +108,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                             });
                         return str;
                     },
-                    icon : function(){ return "url(../images/icons/abilities/Disarm.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--Disarm)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         owner.disarmed=true;
                         owner.physResMod-=this.variant*0.07;
@@ -131,7 +132,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                     desc: function() {
                         return gettextCatalog.getString("Stunned. Skip next turn.");
                     },
-                    icon : function(){ return "url(../images/icons/abilities/WalkAway.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--WalkAway)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         owner.stunned=true;
                     },
@@ -159,7 +160,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                             });
                         return str;
                     },
-                    icon : function(){ return "url(../images/icons/abilities/Sanctuary.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--Sanctuary)"},
                     apply : function (owner, myTeam, enemyTeam) {
 
                     },
@@ -184,7 +185,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                                 one: (this.bleedDamage).toFixed(0)
                             });
                     },
-                    icon : function(){ return "url(../images/icons/abilities/ThePunishmentDue.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--ThePunishmentDue)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         var debuffer = {};
                         for(var i=0;i<enemyTeam.length;i++){
@@ -221,7 +222,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                                 one: (2*this.variant*this.stacks).toFixed(0)
                             });
                     },
-                    icon : function(){ return "url(../images/icons/abilities/ReignInBlood.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--ReignInBlood)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         owner.attackPowerMod+=0.02*this.variant*this.stacks;
                     },
@@ -250,7 +251,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                             });
                         return str;
                     },
-                    icon : function(){ return "url(../images/icons/abilities/MadeInHell.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--MadeInHell)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         owner.magicImmune=true;
                         owner.manaRegMod+=this.variant*0.6;
@@ -282,7 +283,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                             });
                         return str;
                     },
-                    icon : function(){ return "url(../images/icons/abilities/SpillTheBlood.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--SpillTheBlood)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         owner.attackPowerMod+=this.variant*0.1;
                         owner.healthRegMod+=this.variant*0.15;
@@ -308,7 +309,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                                 one: (this.variant*20).toFixed(0)
                             });
                     },
-                    icon : function(){ return "url(../images/icons/abilities/DyersEve.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--DyersEve)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         owner.criticalChanceMod+=this.variant*0.2;
                     },
@@ -330,7 +331,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                     desc: function() {
                         return gettextCatalog.getString("Immunity to control abilities.");
                     },
-                    icon : function(){ return "url(../images/icons/abilities/IDontWannaStop.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--IDontWannaStop)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         owner.controlImmune=true;
                     },
@@ -363,7 +364,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                             });
                         return str;
                     },
-                    icon : function(){ return "url(../images/icons/abilities/LightsInTheSky.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--LightsInTheSky)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         owner.hitChanceMod+=0.15+this.variant*0.02;
                         owner.hitChanceMod+=0.25-this.variant*0.02;
@@ -386,7 +387,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                     desc: function() {
                         return gettextCatalog.getString("Stunned. Skip next turn.");
                     },
-                    icon : function(){ return "url(../images/icons/abilities/Thunderstruck.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--Thunderstruck)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         owner.stunned=true;
                     },
@@ -415,7 +416,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                             });
                         return str;
                     },
-                    icon : function(){ return "url(../images/icons/abilities/YouAintNoAngel.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--YouAintNoAngel)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         owner.physImmune=true;
                         owner.healthRegMod+=this.variant*0.6;
@@ -442,7 +443,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                                 two: (460-this.variant*60).toFixed(0)
                             });
                     },
-                    icon : function(){ return "url(../images/icons/abilities/StateOfGrace.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--StateOfGrace)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         var buffer = {};
                         for(var i=0;i<myTeam.length;i++){
@@ -478,7 +479,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                                 one: (100+this.variant*50).toFixed(0)
                             });
                     },
-                    icon : function(){ return "url(../images/icons/abilities/ComeCoverMe.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--ComeCoverMe)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         var buffer = {};
                         for(var i=0;i<myTeam.length;i++){
@@ -514,7 +515,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                                 one: (this.variant*75).toFixed(0)
                             });
                     },
-                    icon : function(){ return "url(../images/icons/abilities/InjectTheVenom.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--InjectTheVenom)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         var debuffer = {};
                         for(var i=0;i<enemyTeam.length;i++){
@@ -553,7 +554,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                             });
                         return str;
                     },
-                    icon : function(){ return "url(../images/icons/abilities/Invisible.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--Invisible)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         owner.invisible=true;
                         owner.attackPowerMod+=this.variant*0.2;
@@ -576,7 +577,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                     desc: function() {
                         return gettextCatalog.getString("Silenced. Can't cast spells.");
                     },
-                    icon : function(){ return "url(../images/icons/abilities/Jawbreaker.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--Jawbreaker)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         owner.silenced=true;
                     },
@@ -598,7 +599,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                     desc: function() {
                         return gettextCatalog.getString("Immobilized. Can't move.");
                     },
-                    icon : function(){ return "url(../images/icons/abilities/HogTied.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--HogTied)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         owner.immobilized=true;
                     },
@@ -623,7 +624,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                                 one: (this.variant*40).toFixed(0)
                             });
                     },
-                    icon : function(){ return "url(../images/icons/abilities/RunningFree.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--RunningFree)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         //На первом тике удалим все обездвиживающие эффекты (это нужно, если бафф украли)
                         if(this.left===this.duration()) owner.removeImmobilization(myTeam, enemyTeam);
@@ -656,7 +657,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                             });
                         return str;
                     },
-                    icon : function(){ return "url(../images/icons/abilities/FastAsTheShark.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--FastAsTheShark)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         owner.luckMod+=this.variant*0.15;
                         owner.dodgeChanceMod+=this.variant*0.2;
@@ -679,7 +680,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                     desc: function() {
                         return gettextCatalog.getString("Stunned. Skip next turn.");
                     },
-                    icon : function(){ return "url(../images/icons/abilities/Prowler.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--Prowler)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         owner.stunned=true;
                     },
@@ -701,7 +702,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                     desc: function() {
                         return gettextCatalog.getString("This character is invisible for enemy. Effect fades if character takes or deals damage.");
                     },
-                    icon : function(){ return "url(../images/icons/abilities/FadeToBlack.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--FadeToBlack)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         owner.invisible=true;
                     },
@@ -728,7 +729,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                                 one: (this.variant*this.stacks).toFixed(0)
                             });
                     },
-                    icon : function(){ return "url(../images/icons/abilities/Stargazer.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--Stargazer)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         owner.spellPowerMod+=this.variant*0.01*this.stacks;
                     },
@@ -750,7 +751,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                     desc: function() {
                         return gettextCatalog.getString("Silenced. Can't cast spells.");
                     },
-                    icon : function(){ return "url(../images/icons/abilities/NeverAWord.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--NeverAWord)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         owner.silenced=true;
                     },
@@ -783,7 +784,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                             });
                         return str;
                     },
-                    icon : function(){ return "url(../images/icons/abilities/Prophecy.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--Prophecy)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         owner.underProphecy=true;
                         owner.magicResMod-=this.variant*0.1;
@@ -816,7 +817,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                             });
                         return str;
                     },
-                    icon : function(){ return "url(../images/icons/abilities/InfiniteDreams.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--InfiniteDreams)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         owner.takeMana(owner.maxMana*(this.variant)*0.01, owner, this.name, false);
                         owner.initiativeMod+=this.variant*0.15;
@@ -845,7 +846,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                         str+=gettextCatalog.getString("Immobilized. Can't move.");
                         return str;
                     },
-                    icon : function(){ return "url(../images/icons/abilities/CaughtSomewhereInTime.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--CaughtSomewhereInTime)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         owner.immobilized=true;
                         var debuffer = {};
@@ -880,7 +881,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                     desc: function() {
                         return gettextCatalog.getString("Disarmed. Can't use abilities, what needs weapon.");
                     },
-                    icon : function(){ return "url(../images/icons/abilities/BurningAmbition.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--BurningAmbition)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         owner.disarmed=true;
                     },
@@ -911,7 +912,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                             });
                         return str;
                     },
-                    icon : function(){ return "url(../images/icons/abilities/ThankGodForTheBomb.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--ThankGodForTheBomb)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         var debuffer = {};
                         for(var i=0;i<enemyTeam.length;i++){
@@ -966,7 +967,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                     desc: function() {
                         return gettextCatalog.getString("Stunned. Skip next turn.");
                     },
-                    icon : function(){ return "url(../images/icons/abilities/ThankGodForTheBomb.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--ThankGodForTheBomb)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         owner.stunned=true;
                     },
@@ -998,7 +999,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                             "Effect fades if you use ability.");
                         return str;
                     },
-                    icon : function(){ return "url(../images/icons/abilities/Powerslave.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--Powerslave)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         owner.clearCast=true;
                         owner.spellPowerMod+=this.variant*0.15;
@@ -1024,7 +1025,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                             two: (this.variant*60).toFixed(0)
                         });
                     },
-                    icon : function(){ return "url(../images/icons/abilities/Cauterization.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--Cauterization)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         var buffer = {};
                         for (var i = 0; i < myTeam.length; i++) {
@@ -1071,7 +1072,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                             "Effect fades if character miss.");
                         return str;
                     },
-                    icon : function(){ return "url(../images/icons/abilities/DownInFlames.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--DownInFlames)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         //т.к. кд=0, сначала убавим значение у персонажа, а потом прибавим снова
                         if(this.stacks>1){
@@ -1101,7 +1102,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                             one: (20+this.variant*10).toFixed(0)
                         });
                     },
-                    icon : function(){ return "url(../images/icons/abilities/FightFireWithFire.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--FightFireWithFire)"},
                     apply : function (owner, myTeam, enemyTeam) {
                     },
                     duration: function(){return 10+this.variant},
@@ -1127,7 +1128,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                                 one: ((75+this.variant*15)*this.stacks).toFixed(0)
                             });
                     },
-                    icon : function(){ return "url(../images/icons/abilities/MercyfulFate.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--MercyfulFate)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         var buffer = {};
                         for(var i=0;i<myTeam.length;i++){
@@ -1165,7 +1166,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                         }
 
                     },
-                    icon : function(){ return "url(../images/icons/abilities/HallowedBeThyName.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--HallowedBeThyName)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         switch(this.variant){
                             case 1:
@@ -1209,7 +1210,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                     desc: function() {
                         return gettextCatalog.getString("Immune to all damage and control.");
                     },
-                    icon : function(){ return "url(../images/icons/abilities/HeavenCanWait.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--HeavenCanWait)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         owner.physImmune=true;
                         owner.magicImmune=true;
@@ -1238,7 +1239,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                                 one: (40+this.variant*60).toFixed(0)
                             });
                     },
-                    icon : function(){ return "url(../images/icons/abilities/FearOfTheDark.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--FearOfTheDark)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         var debuffer = {};
                         for(var i=0;i<enemyTeam.length;i++){
@@ -1273,7 +1274,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                                 one: (30*this.variant*this.stacks).toFixed(0)
                             });
                     },
-                    icon : function(){ return "url(../images/icons/abilities/CreepingDeath.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--CreepingDeath)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         var debuffer = {};
                         for(var i=0;i<enemyTeam.length;i++){
@@ -1327,7 +1328,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                             "Character infects nearby allies in 1 cell radius.");
                         return str;
                     },
-                    icon : function(){ return "url(../images/icons/abilities/SpreadingTheDisease.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--SpreadingTheDisease)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         var debuffer = {};
                         for(var i=0;i<enemyTeam.length;i++){
@@ -1379,7 +1380,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                         }
 
                     },
-                    icon : function(){ return "url(../images/icons/abilities/ChildrenOfTheDamned.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--ChildrenOfTheDamned)"},
                     apply : function (owner, myTeam, enemyTeam) {
                         switch(this.variant){
                             case 1:
@@ -1423,7 +1424,7 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
                     desc: function() {
                         return gettextCatalog.getString("Buffs and debuffs of this character can't be dispelled or stolen.");
                     },
-                    icon : function(){ return "url(../images/icons/abilities/LockedAndLoaded.svg)"},
+                    icon : function(){ return "url(../images/assets/svg/view/sprites.svg#abilities--LockedAndLoaded)"},
                     apply : function (owner, myTeam, enemyTeam) {
                     },
                     duration: function(){return 4+this.variant*2},
@@ -1438,4 +1439,5 @@ angular.module('fotm').register.service('effectService', ["randomService", "gett
             }
         }
     }
-}]);
+});
+})(angular.module("fotm"));
